@@ -1,13 +1,8 @@
-import array
-
 import numpy as np
-from operator import xor
 import random
 
 plainTextMessage = "WE ARE DISCOVERED. FLEE AT ONCE"
-
 compositeKey = "1422555515"
-
 polybius = np.array([['E', '2', 'R', 'F', 'Z', 'M'],
                      ['Y', 'H', '3', '0', 'B', '7'],
                      ['O', 'Q', 'A', 'N', 'U', 'K'],
@@ -152,7 +147,6 @@ def compressMatrix(matrix):
 
 print('Plaintext message: {}'.format(plainTextMessage))
 
-# Perform first encoding
 key = getColumnarTranspositionKey(compositeKey)
 first_encode = encryptWithColumnarTransposition(plainTextMessage, key)
 print("First encoding: " + first_encode)
