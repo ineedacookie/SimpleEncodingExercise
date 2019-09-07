@@ -1,4 +1,7 @@
+import array
+
 import numpy as np
+from operator import xor
 import random
 
 plainTextMessage = "WE ARE DISCOVERED. FLEE AT ONCE"
@@ -6,11 +9,11 @@ plainTextMessage = "WE ARE DISCOVERED. FLEE AT ONCE"
 compositeKey = "1422555515"
 
 polybius = np.array([['E', '2', 'R', 'F', 'Z', 'M'],
-                            ['Y', 'H', '3', '0', 'B', '7'],
-                            ['O', 'Q', 'A', 'N', 'U', 'K'],
-                            ['P', 'X', 'J', '4', 'V', 'W'],
-                            ['D', '1', '8', 'G', 'C', '6'],
-                            ['9', 'I', 'S', '5', 'T', 'L']])
+                     ['Y', 'H', '3', '0', 'B', '7'],
+                     ['O', 'Q', 'A', 'N', 'U', 'K'],
+                     ['P', 'X', 'J', '4', 'V', 'W'],
+                     ['D', '1', '8', 'G', 'C', '6'],
+                     ['9', 'I', 'S', '5', 'T', 'L']])
 
 
 def getLocationInSquare(letter):
@@ -20,25 +23,11 @@ def getLocationInSquare(letter):
     return loc_int
 
 
-def encode2(cipher1, key):
-    cipher1_locations = []
-    key = int(key)
-    encrypted_array = []
-    # cipher1_loc_bin = []
-    # binary_key = f'{15:06b}'
-
-    for i in cipher1:
-        cipher1_locations.append(getLocationInSquare(i))
-
-    # for i in cipher1_locations:
-    #     cipher1_loc_bin.append("{:06b}".format(i))
-
-    for i in cipher1_locations:
-        encrypted_array.append(i ^ key)
-
-    encrypted_string = ''.join(map(str, encrypted_array))
-
-    return encrypted_string
+def oneTimePad(cipher1, key):
+    cipher_array = bytearray(cipher1, 'ascii')
+    for i in range(len(cipher_array)):
+        cipher_array[i] ^= int(key)
+    return cipher_array.decode('ascii')
 
 
 def getColumnarTranspositionKey(compositeKey):
@@ -91,7 +80,7 @@ def encryptWithColumnarTransposition(plainText, key):
     for i in range(0, len(sortedKey)):
         sortedKeyPairs.append((sortedKey[i], i, -1))
 
-    newSortedKeyPairs = [];
+    newSortedKeyPairs = []
 
     for i in range(0, len(key)):
         for j in range(0, len(sortedKeyPairs)):
@@ -150,8 +139,6 @@ def createDecodeMatrix(cybertext, key):
             unsortTempArray[positionKey[j]] = tempArray[j]
 
         matrix.append(unsortTempArray)
-
-
     return matrix
 
 
@@ -163,24 +150,23 @@ def compressMatrix(matrix):
     return string
 
 
+print('Plaintext message: {}'.format(plainTextMessage))
+
+# Perform first encoding
 key = getColumnarTranspositionKey(compositeKey)
 first_encode = encryptWithColumnarTransposition(plainTextMessage, key)
-print("First Coding: " + first_encode)
+print("First encoding: " + first_encode)
 
-second_encode = encode2(first_encode, compositeKey[-2:])
-print("Second Coding: " + second_encode)
+second_encode = oneTimePad(first_encode, compositeKey[-2:])
+print("Second encoding: " + second_encode)
 
-
-# TODO add first decoding and connect to second decoding
-print("First Decoding: ")
-first_decoding = first_encode
-
+first_decoding = oneTimePad(second_encode, compositeKey[-2:])
+print("First decoding {}".format(first_decoding))
 
 
 """ Everything after this point is for the second decryption """
 key = getColumnarTranspositionKey(compositeKey)
-cybertext = first_decoding
-
+cybertext = first_encode
 
 sortedKey = sorted(key)
 
