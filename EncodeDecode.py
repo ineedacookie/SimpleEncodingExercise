@@ -170,14 +170,20 @@ print("First Coding: " + first_encode)
 second_encode = encode2(first_encode, compositeKey[-2:])
 print("Second Coding: " + second_encode)
 
+""" Second_encode returns a string of integers which represent each letter within the original plaintext string"""
+
 
 # TODO add first decoding and connect to second decoding
 print("First Decoding: ")
+plaintext = second_encode
+key = compositeKey
+
+
 first_decoding = first_encode
 
 
 
-""" Everything after this point is for the second decryption """
+""" Everything after this point is to decrypt the columner transpostion that the first decoding returns """
 key = getColumnarTranspositionKey(compositeKey)
 cybertext = first_decoding
 
