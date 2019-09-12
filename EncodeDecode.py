@@ -147,12 +147,26 @@ def compressMatrix(matrix):
 
 print('Plaintext message: {}'.format(plainTextMessage))
 
+# task 1
 key = getColumnarTranspositionKey(compositeKey)
 first_encode = encryptWithColumnarTransposition(plainTextMessage, key)
+print("Task 1\n"
+      "Input: \n"
+      " Composite Key: " + compositeKey + "\n" +
+      " Plaintext message: " + plainTextMessage + "\n")
+
 print("First encoding: " + first_encode)
 
 second_encode = oneTimePad(first_encode, compositeKey[-2:])
-print("Second encoding: " + second_encode)
+print("Second encoding: " + second_encode + "\n")
+
+print("Output: " + second_encode)
+
+# task 2
+print("Task 2\n"
+      "Input: \n"
+      " Composite Key: " + compositeKey + "\n" +
+      " encoded message: " + second_encode + "\n")
 
 first_decoding = oneTimePad(second_encode, compositeKey[-2:])
 print("First decoding {}".format(first_decoding))
@@ -167,4 +181,6 @@ sortedKey = sorted(key)
 matrix = createDecodeMatrix(cybertext, key)
 
 decoded = compressMatrix(matrix)
-print("Second and final Decoding: " + decoded)
+print("Second and final Decoding: " + decoded + "\n")
+
+print("Output: " + decoded)
