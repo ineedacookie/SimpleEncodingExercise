@@ -19,10 +19,28 @@ def getLocationInSquare(letter):
 
 
 def oneTimePad(cipher1, key):
-    cipher_array = bytearray(cipher1, 'ascii')
-    for i in range(len(cipher_array)):
-        cipher_array[i] ^= int(key)
-    return cipher_array.decode('ascii')
+    # cipher_array = bytearray(cipher1, 'ascii')
+    # for i in range(len(cipher_array)):
+    #     cipher_array[i] ^= int(key)
+    # return cipher_array.decode('ascii')
+    cipher1_locations = []
+    key = int(key)
+    encrypted_array = []
+    # cipher1_loc_bin = []
+    # binary_key = f'{15:06b}'
+
+    for i in cipher1:
+        cipher1_locations.append(getLocationInSquare(i))
+
+    # for i in cipher1_locations:
+    #     cipher1_loc_bin.append("{:06b}".format(i))
+
+    for i in cipher1_locations:
+        encrypted_array.append(i ^ key)
+
+    encrypted_string = ''.join(map(str, encrypted_array))
+
+    return encrypted_string
 
 
 def getColumnarTranspositionKey(compositeKey):
@@ -174,7 +192,7 @@ print("First decoding {}".format(first_decoding))
 
 """ Everything after this point is to decrypt the columner transpostion that the first decoding returns """
 key = getColumnarTranspositionKey(compositeKey)
-cybertext = first_encode
+cybertext = first_decoding
 
 sortedKey = sorted(key)
 
