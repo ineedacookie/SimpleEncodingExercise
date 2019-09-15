@@ -25,16 +25,27 @@ def getLocationInSquare(letter):
     return loc_int
 
 
-def oneTimePad(cipher1, key):
+def oneTimePadEncode(plaintext, key):
     return_value = ''
-    otp_values = cipher1
-    if not isinstance(cipher1, list):
-        if isinstance(cipher1, str):
-            otp_values = [cipher1[i:i + 2] for i in range(0, len(cipher1), 2)]
-        else:
-            raise OTPInvalidInputError(cipher1)
+    otp_values = plaintext
+    if isinstance(plaintext, str):
+        otp_values = [getLocationInSquare(l) for l in plaintext]
+    elif not isinstance(plaintext, list):
+        raise OTPInvalidInputError(plaintext)
     for value in otp_values:
-        return_value += '{0:0=2d}'.format(int(value) ^ key)
+        return_value += '{0:0=2d}'.format(int(value) ^ int(key))
+    return return_value
+
+
+def oneTimePadDecode(encoded_str, key):
+    return_value = ''
+    if isinstance(encoded_str, str) and encoded_str.isnumeric() and len(encoded_str) % 2 == 0:
+        otp_values = [int(encoded_str[i:i + 2]) for i in range(0, len(encoded_str), 2)]
+    else:
+        raise OTPInvalidInputError(encoded_str)
+    for value in otp_values:
+        xor_result = '{0:0=2d}'.format(value ^ int(key))
+        return_value += polybius[int(xor_result[0])][int(xor_result[1])]
     return return_value
 
 
@@ -170,8 +181,8 @@ def __main__():
           " Plaintext message: " + plainTextMessage + "\n")
 
     print("First encoding: " + first_encode)
-    second_encode = oneTimePad(first_encode, compositeKey[-2:])
-    print("Output from 2nd encode (OneTimePad encoding): {}".format([i for i in second_encode]))
+    second_encode = oneTimePadEncode(first_encode, compositeKey[-2:])
+    print("Output from 2nd encode (OneTimePad encoding): {}".format(second_encode))
 
     # task 2
     print("\n===================\n"
@@ -180,13 +191,13 @@ def __main__():
           " Composite Key: " + compositeKey + "\n" +
           " encoded message: {}\n".format(second_encode))
 
-    first_decoding = oneTimePad(second_encode, compositeKey[-2:])
+    first_decoding = oneTimePadDecode(second_encode, compositeKey[-2:])
     print("First decoding {}".format(first_decoding))
 
 
     """ Everything after this point is to decrypt the columner transpostion that the first decoding returns """
     key = getColumnarTranspositionKey(compositeKey)
-    cybertext = first_decoding.decode('ascii')
+    cybertext = first_decoding
 
     sortedKey = sorted(key)
 
