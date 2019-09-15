@@ -1,8 +1,15 @@
 import numpy as np
 import random
 
+
+class OTPInvalidInputError(Exception):
+    def __init__(self, provided_obj):
+        super().__init__('OneTimePad require an array of ints. You provided {}: {}'.format(type(provided_obj), provided_obj))
+
+
 plainTextMessage = "WE ARE DISCOVERED. FLEE AT ONCE"
 compositeKey = "1422555515"
+
 polybius = np.array([['E', '2', 'R', 'F', 'Z', 'M'],
                      ['Y', 'H', '3', '0', 'B', '7'],
                      ['O', 'Q', 'A', 'N', 'U', 'K'],
@@ -18,29 +25,28 @@ def getLocationInSquare(letter):
     return loc_int
 
 
-def oneTimePad(cipher1, key):
-    # cipher_array = bytearray(cipher1, 'ascii')
-    # for i in range(len(cipher_array)):
-    #     cipher_array[i] ^= int(key)
-    # return cipher_array.decode('ascii')
-    cipher1_locations = []
-    key = int(key)
-    encrypted_array = []
-    # cipher1_loc_bin = []
-    # binary_key = f'{15:06b}'
+def oneTimePadEncode(plaintext, key):
+    return_value = ''
+    otp_values = plaintext
+    if isinstance(plaintext, str):
+        otp_values = [getLocationInSquare(l) for l in plaintext]
+    elif not isinstance(plaintext, list):
+        raise OTPInvalidInputError(plaintext)
+    for value in otp_values:
+        return_value += '{0:0=2d}'.format(int(value) ^ int(key))
+    return return_value
 
-    for i in cipher1:
-        cipher1_locations.append(getLocationInSquare(i))
 
-    # for i in cipher1_locations:
-    #     cipher1_loc_bin.append("{:06b}".format(i))
-
-    for i in cipher1_locations:
-        encrypted_array.append(i ^ key)
-
-    encrypted_string = ''.join(map(str, encrypted_array))
-
-    return encrypted_string
+def oneTimePadDecode(encoded_str, key):
+    return_value = ''
+    if isinstance(encoded_str, str) and encoded_str.isnumeric() and len(encoded_str) % 2 == 0:
+        otp_values = [int(encoded_str[i:i + 2]) for i in range(0, len(encoded_str), 2)]
+    else:
+        raise OTPInvalidInputError(encoded_str)
+    for value in otp_values:
+        xor_result = '{0:0=2d}'.format(value ^ int(key))
+        return_value += polybius[int(xor_result[0])][int(xor_result[1])]
+    return return_value
 
 
 def getColumnarTranspositionKey(compositeKey):
@@ -163,42 +169,45 @@ def compressMatrix(matrix):
     return string
 
 
-print('Plaintext message: {}'.format(plainTextMessage))
+def __main__():
+    print('Plaintext message: {}'.format(plainTextMessage))
 
-# task 1
-key = getColumnarTranspositionKey(compositeKey)
-first_encode = encryptWithColumnarTransposition(plainTextMessage, key)
-print("Task 1\n"
-      "Input: \n"
-      " Composite Key: " + compositeKey + "\n" +
-      " Plaintext message: " + plainTextMessage + "\n")
+    # task 1
+    key = getColumnarTranspositionKey(compositeKey)
+    first_encode = encryptWithColumnarTransposition(plainTextMessage, key)
+    print("Task 1\n"
+          "Input: \n"
+          " Composite Key: " + compositeKey + "\n" +
+          " Plaintext message: " + plainTextMessage + "\n")
 
-print("First encoding: " + first_encode)
+    print("First encoding: " + first_encode)
+    second_encode = oneTimePadEncode(first_encode, compositeKey[-2:])
+    print("Output from 2nd encode (OneTimePad encoding): {}".format(second_encode))
 
-second_encode = oneTimePad(first_encode, compositeKey[-2:])
-print("Second encoding: " + second_encode + "\n")
+    # task 2
+    print("\n===================\n"
+          "Task 2\n"
+          "Input: \n"
+          " Composite Key: " + compositeKey + "\n" +
+          " encoded message: {}\n".format(second_encode))
 
-print("Output: " + second_encode)
-
-# task 2
-print("Task 2\n"
-      "Input: \n"
-      " Composite Key: " + compositeKey + "\n" +
-      " encoded message: " + second_encode + "\n")
-
-first_decoding = oneTimePad(second_encode, compositeKey[-2:])
-print("First decoding {}".format(first_decoding))
+    first_decoding = oneTimePadDecode(second_encode, compositeKey[-2:])
+    print("First decoding {}".format(first_decoding))
 
 
-""" Everything after this point is to decrypt the columner transpostion that the first decoding returns """
-key = getColumnarTranspositionKey(compositeKey)
-cybertext = first_decoding
+    """ Everything after this point is to decrypt the columner transpostion that the first decoding returns """
+    key = getColumnarTranspositionKey(compositeKey)
+    cybertext = first_decoding
 
-sortedKey = sorted(key)
+    sortedKey = sorted(key)
 
-matrix = createDecodeMatrix(cybertext, key)
+    matrix = createDecodeMatrix(cybertext, key)
 
-decoded = compressMatrix(matrix)
-print("Second and final Decoding: " + decoded + "\n")
+    decoded = compressMatrix(matrix)
+    print("Second and final Decoding: " + decoded + "\n")
 
-print("Output: " + decoded)
+    print("Output: " + decoded)
+
+
+if __name__ == '__main__':
+    __main__()
