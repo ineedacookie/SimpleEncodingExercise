@@ -26,13 +26,16 @@ def getLocationInSquare(letter):
 
 
 def oneTimePad(cipher1, key):
+    return_value = ''
     otp_values = cipher1
     if not isinstance(cipher1, list):
         if isinstance(cipher1, str):
-            otp_values = bytearray(cipher1, 'ascii')
+            otp_values = [cipher1[i:i + 2] for i in range(0, len(cipher1), 2)]
         else:
             raise OTPInvalidInputError(cipher1)
-    return [int(i) ^ int(key) for i in otp_values]
+    for value in otp_values:
+        return_value += '{0:0=2d}'.format(int(value) ^ key)
+    return return_value
 
 
 def getColumnarTranspositionKey(compositeKey):
